@@ -23,26 +23,32 @@ class _GameState extends State<Game> {
   final velocity = 1.0;
   final gravity = 0.1;
 
+  bool started = false;
   Timer? timer;
+  
+  double randomRange(int min, int max) {
+    return (min + Random().nextInt((max + 1) - min)).toDouble();
+  }
 
   void spawPipes() {
     var gap = 160;
-    var height = size.height - gap;
 
     for (var i=0; i<5; i++) {
-      var diff = Random().nextInt(height ~/ 2);
       var x = size.width + (size.width * i);
+      
+      var hTop = randomRange(0, size.height ~/ 2);
+      var hBottom = size.height - hTop - gap;
 
       pipes.addAll([
         Pipe(
           x: x, 
           y: 0, 
-          height: height - diff
+          height: hTop
         ),
         Pipe(
           x: x, 
-          y: size.height - diff,
-          height: diff.toDouble()
+          y: size.height - hBottom,
+          height: hBottom
         )
       ]);
     }
@@ -62,18 +68,15 @@ class _GameState extends State<Game> {
         for (var pipe in pipes) {
           pipe.x -= velocity;
 
-          if (pipe.x + pipe.width < 0) {
-            pipes.remove(pipe);
-          }
-
           if (
             flappy.x < pipe.x + pipe.width &&
             flappy.x + flappy.width > pipe.x &&
             flappy.y + flappy.vy < pipe.y + pipe.height &&
             flappy.y + flappy.vy + flappy.height > pipe.y
           ) {
-            //reset();
-            t.cancel();
+            reset();
+            break;
+            //t.cancel();
           }
         }
 
@@ -81,11 +84,14 @@ class _GameState extends State<Game> {
           spawPipes();
         }
 
+        /* remove pipes */
+        pipes.removeWhere((p) => p.x + p.width < 0);
       });
     });
   }
 
   void reset() {
+
     flappy.x = 30;
     flappy.y = 100;
     flappy.vy = 0;
@@ -96,7 +102,6 @@ class _GameState extends State<Game> {
   @override
   void initState() {
     super.initState();
-    update();
     spawPipes();
   }
 
@@ -112,7 +117,12 @@ class _GameState extends State<Game> {
       backgroundColor: Colors.black,
       body: GestureDetector(
         onTap: () {
-          flappy.vy = -4.0;
+          if (started) {
+            flappy.vy = -4.0;
+          } else {
+            started = true;
+            update();
+          }
         },
         child: Center(
           child: Container(
@@ -121,6 +131,19 @@ class _GameState extends State<Game> {
             color: Colors.blue.shade300,
             child: Stack(
               children: [
+
+                if (!started) Positioned(
+                  left: size.width / 4.5,
+                  top: size.height / 2,
+                  child: const Text("TOUCH FOR START", style: TextStyle(
+                    fontSize: 20,
+                    color: Colors.yellow,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(color: Colors.black, offset: Offset(1.5, 1.5))
+                    ]
+                  )),
+                ),
         
                 AnimatedPositioned(
                   left: flappy.x,
@@ -132,7 +155,6 @@ class _GameState extends State<Game> {
                     color: Colors.red,
                   )
                 ),
-        
         
                 for (var pipe in pipes)
                   AnimatedPositioned(

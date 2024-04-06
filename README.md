@@ -1,16 +1,33 @@
-# flutter_bird
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 
-A new Flutter project.
+# Flutter Bird
 
-## Getting Started
+### (No Assets)
 
-This project is a starting point for a Flutter application.
+Clone Flappy Bird game just with Flutter Web/Linux/Ios/Android
 
-A few resources to get you started if this is your first Flutter project:
+## Screenshots
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+![App Screenshot](./screens/game.gif)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Running
+
+Clone to project
+
+```bash
+  git clone https://github.com/ayusuke7/FlutterBird
+
+  cd FlutterBird
+
+  flutter pub get
+
+  flutter run
+```
+
+## Play
+
+Touch screen for Up
+
+## Autor
+
+- [@ayusuke7](https://github.com/ayusuke7)
