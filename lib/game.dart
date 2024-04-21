@@ -14,30 +14,32 @@ class Game extends StatefulWidget {
 
 class _GameState extends State<Game> {
 
-  final size = const Size(320, 640);
   final fps = const Duration(milliseconds: 10);
 
-  final flappy = Bird(x: 30, y: 100);
+  final flappy = Bird(x: 100, y: 100);
   final pipes = <Pipe>[];
 
+  final pipeGap = 160.0;
   final velocity = 1.0;
   final gravity = 0.1;
+  final force = 3.5;
 
-  bool started = false;
+  Size size = const Size(480, 720);
   Timer? timer;
+
+  int score = 0;
+  bool started = false;
   
   double randomRange(int min, int max) {
     return (min + Random().nextInt((max + 1) - min)).toDouble();
   }
 
   void spawPipes() {
-    var gap = 160;
-
-    for (var i=0; i<5; i++) {
+    for (var i=0; i<10; i++) {
       var x = size.width + (size.width * i);
       
       var hTop = randomRange(0, size.height ~/ 2);
-      var hBottom = size.height - hTop - gap;
+      var hBottom = size.height - hTop - pipeGap;
 
       pipes.addAll([
         Pipe(
@@ -76,33 +78,42 @@ class _GameState extends State<Game> {
           ) {
             reset();
             break;
-            //t.cancel();
-          }
-        }
+          } 
 
-        if (pipes.isEmpty) {
-          spawPipes();
+          // if (
+          //   pipes.indexOf(pipe) % 2 == 0 &&
+          //   flappy.x < pipe.x + pipe.width
+          // ) {
+          //   print(t.tick);
+          //   score++;
+          // }
         }
 
         /* remove pipes */
         pipes.removeWhere((p) => p.x + p.width < 0);
+
+
+        /* spaw news pipes */
+        if (pipes.isEmpty) {
+          spawPipes();
+        }
+
       });
     });
   }
 
   void reset() {
-
     flappy.x = 30;
     flappy.y = 100;
     flappy.vy = 0;
-
+    score = 0;
     pipes.clear();
   }
 
   @override
   void initState() {
     super.initState();
-    spawPipes();
+    //spawPipes();
   }
 
   @override
@@ -113,39 +124,27 @@ class _GameState extends State<Game> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () {
-          if (started) {
-            flappy.vy = -4.0;
-          } else {
-            started = true;
-            update();
-          }
-        },
-        child: Center(
+    size = MediaQuery.of(context).size;
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        body: GestureDetector(
+          onTap: () {
+            if (started) {
+              flappy.vy = -force;
+            } else {
+              started = true;
+              update();
+            }
+          },
           child: Container(
             width: size.width,
             height: size.height,
             color: Colors.blue.shade300,
             child: Stack(
               children: [
-
-                if (!started) Positioned(
-                  left: size.width / 4.5,
-                  top: size.height / 2,
-                  child: const Text("TOUCH FOR START", style: TextStyle(
-                    fontSize: 20,
-                    color: Colors.yellow,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(color: Colors.black, offset: Offset(1.5, 1.5))
-                    ]
-                  )),
-                ),
-        
-                AnimatedPositioned(
+                    
+                if (started) AnimatedPositioned(
                   left: flappy.x,
                   top: flappy.y,
                   duration: fps,
@@ -155,7 +154,7 @@ class _GameState extends State<Game> {
                     color: Colors.red,
                   )
                 ),
-        
+                    
                 for (var pipe in pipes)
                   AnimatedPositioned(
                     top: pipe.y,
@@ -167,7 +166,40 @@ class _GameState extends State<Game> {
                       color: Colors.green,
                     )
                   ),
-          
+                
+                if (started) Align(
+                  alignment: Alignment.topCenter,
+                  child: Text("SCORE\n$score",
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 22,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black, 
+                          offset: Offset(1.5, 1.5)
+                        )
+                      ]
+                    )
+                  )
+                ),
+                
+                if (!started) Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    padding: const EdgeInsets.all(15.0),
+                    decoration: BoxDecoration(
+                      color: Colors.yellow.shade200,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(width: 4.0)
+                    ),
+                    child: const Text("TOUCH FOR START", style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    )),
+                  ),
+                ),
               ]
             ),
           ),
@@ -175,4 +207,5 @@ class _GameState extends State<Game> {
       ),
     );
   }
+
 }
